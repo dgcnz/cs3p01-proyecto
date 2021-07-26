@@ -9,7 +9,6 @@
 #include <vector>
 
 namespace tsp {
-
 template <typename W, W INF = std::numeric_limits<W>::max()>
 struct DenseGraph {
     std::vector<std::vector<W>> g;

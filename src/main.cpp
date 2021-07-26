@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include "tsp/tsp.h"
+#include "tsp/tsp.hpp"
 
 /// Program entry point.
 int main(const int argc, const char* argv[]) {
