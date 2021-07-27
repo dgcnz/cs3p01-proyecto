@@ -1,7 +1,11 @@
 /// \file
+#include <algorithm>
+#include <iterator>
+#include <sstream>
+#include <string>
 
-#include <iostream>
-
+#include "dbg.h"
+#include "httplib/httplib.h"
 #include "tsp/tsp.hpp"
 
 /*
@@ -31,21 +35,43 @@ const double distance_matrix[N][N] = {
 };
 
 /// Program entry point.
-int main(const int argc, const char* argv[]) {
-    using namespace tsp;
-    DenseGraph<int> g(N);
-    for (int i = 0; i < N; ++i) {
-        for (int j = 0; j < N; ++j) {
-            g.add_edge(i, j, distance_matrix[i][j]);
-        }
-    }
-    auto [order, cost] = parallel::tsp(g, 0, 4);
+int main(void) {
+    httplib::Server svr;
 
-    std::cout << "order: ";
-    for (auto& i : order) {
-        std::cout << i << " ";
-    }
-    std::cout << std::endl << "cost: " << cost << std::endl;
+    svr.Get("/", [](const httplib::Request& req, httplib::Response& res) {
+        /* Input */
+        std::vector<int> v;
+        std::istringstream is(req.get_param_value("v"));
+        std::string str;
+        while (std::getline(is, str, ',')) v.push_back(std::stoi(str));
+        int src = std::stoi(req.get_param_value("src")),
+            dst = std::stoi(req.get_param_value("dst"));
+        dbg(v);
+        dbg(src);
+        dbg(dst);
+
+        /* Parallel tsp */
+        tsp::DenseGraph<int> g(N);
+        for (int& i : v) {
+            for (int& j : v) {
+                g.add_edge(i, j, distance_matrix[i][j]);
+            }
+        }
+        auto [order, cost] = tsp::parallel::tsp(g, src, dst);
+
+        /* Output */
+        std::ostringstream os;
+        os << "{ \"order\": [";
+        std::copy(order.begin(), order.end(), std::ostream_iterator<int>(os, ","));
+        os << "], \"cost\": " << cost << " }";
+        std::string content(os.str());
+
+        res.set_content(content, "application/json");
+    });
+
+    svr.Get("/stop", [&](const httplib::Request&, httplib::Response&) { svr.stop(); });
+
+    svr.listen("0.0.0.0", 8080);
 
     return EXIT_SUCCESS;
 }
