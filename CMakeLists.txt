@@ -3,7 +3,7 @@ project(cs3p01-proyecto)
 
 # Require C++17.
 # Change this value to require other C++ standards (14, 17, etc.)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED)
 
 include_directories(include)
