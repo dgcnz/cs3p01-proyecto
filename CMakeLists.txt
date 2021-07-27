@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2)
 project(cs3p01-proyecto)
 
-# Require C++11.
+# Require C++17.
 # Change this value to require other C++ standards (14, 17, etc.)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED)
@@ -36,3 +36,9 @@ option(WERROR "Turn warnings into errors" OFF)
 if (WERROR)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Werror")
 endif ()
+
+# OMP
+find_package(OpenMP REQUIRED)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")

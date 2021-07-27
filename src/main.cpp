@@ -1,5 +1,8 @@
 /// \file
 
+#include <omp.h>
+#include <stdio.h>
+
 #include <iostream>
 
 #include "tsp/tsp.hpp"
@@ -19,6 +22,11 @@ int main(const int argc, const char* argv[]) {
     auto [order, cost] = tsp::tsp(g, 0, 4);
 
     std::cout << cost << std::endl;
+
+#pragma omp parallel for
+    for (int i = 0; i < 5; ++i) {
+        printf("%d \n", i);
+    }
 
     return EXIT_SUCCESS;
 }
