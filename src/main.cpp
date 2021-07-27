@@ -37,7 +37,6 @@ int main(const int argc, const char* argv[]) {
     for (int i = 0; i < N; ++i) {
         for (int j = 0; j < N; ++j) {
             g.add_edge(i, j, distance_matrix[i][j]);
-            g.add_edge(j, i, distance_matrix[i][j]);
         }
     }
     auto [order, cost] = parallel::tsp(g, 0, 4);
