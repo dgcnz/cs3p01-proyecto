@@ -89,8 +89,10 @@ std::pair<std::vector<int>, W> tsp(DenseGraph<W, INF> g, int src, int dst) {
             reverse(order.begin(), order.end());
 #pragma omp critical
             {
-                best_cost = u->cost;
-                best_order = order;
+                if (u->cost < best_cost) {
+                    best_cost = u->cost;
+                    best_order = order;
+                }
             }
         }
         delete u;
