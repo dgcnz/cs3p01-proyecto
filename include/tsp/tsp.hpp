@@ -87,8 +87,8 @@ std::pair<std::vector<int>, W> tsp(DenseGraph<W> g, int src, int dst, BinOp add 
             if (v == dst and level + 1 != n) continue;
             if (not g.valid(u->id, v)) continue;
             if (add(u->cost, g[u->id][v]) >= best_cost) continue;
-#pragma omp task default(none) shared(g, bb, u, best_order, best_cost, add) \
-    firstprivate(n, v, src, dst, level) final(threshold(level))
+#pragma omp task default(none) shared(g, bb, u, best_order, best_cost, add, n, src, dst) \
+    firstprivate(v, level) final(threshold(level))
             bb(new Node<W>(v, u->vis | (1 << v), add(u->cost, g[u->id][v]), u));
         }
 
