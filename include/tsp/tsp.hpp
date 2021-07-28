@@ -72,25 +72,27 @@ std::pair<std::vector<int>, W> tsp(DenseGraph<W> g, int src, int dst, BinOp add 
 }  // namespace sequential
 
 namespace parallel {
-template <typename W, typename BinOp = std::plus<W>>
+template <int P, typename W, typename BinOp = std::plus<W>>
 std::pair<std::vector<int>, W> tsp(DenseGraph<W> g, int src, int dst, BinOp add = std::plus<W>()) {
     int n = g.size();
     std::vector<int> best_order;
     W best_cost = g.INF;
-
-    auto threshold = [n](int level) { return (level - 2) * n > omp_get_num_threads(); };
+    auto threshold = [n](int level) { return (level - 1) * n > omp_get_num_threads(); };
+    // auto threshold = [n](int level) { return false; };
 
     std::function<void(Node<W>*)> bb = [&](Node<W>* u) {
         int level = __builtin_popcount(u->vis);
-#pragma omp taskloop default(none) shared(g, bb, u, best_order, best_cost, add) \
-    firstprivate(n, src, dst, level) final(threshold(level))
         for (int v = 0; v < n; ++v) {
             if (u->vis & (1 << v)) continue;
             if (v == dst and level + 1 != n) continue;
             if (not g.valid(u->id, v)) continue;
             if (add(u->cost, g[u->id][v]) >= best_cost) continue;
+#pragma omp task default(none) shared(g, bb, u, best_order, best_cost, add) \
+    firstprivate(n, v, src, dst, level) final(threshold(level))
             bb(new Node<W>(v, u->vis | (1 << v), add(u->cost, g[u->id][v]), u));
         }
+
+#pragma omp taskwait
         if (u->id == dst) {
             Node<W>* temp = u;
             std::vector<int> order;
@@ -111,7 +113,7 @@ std::pair<std::vector<int>, W> tsp(DenseGraph<W> g, int src, int dst, BinOp add 
     };
 
 #pragma omp parallel default(none) shared(g, bb, best_order, best_cost, add) \
-    firstprivate(n, src, dst)
+    firstprivate(n, src, dst) num_threads(P)
 #pragma omp single nowait
     { bb(new Node<W>(src, (1 << src), W(), nullptr)); }
     return {best_order, best_cost};

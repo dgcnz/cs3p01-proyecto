@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "catch2/catch.hpp"
+#include "dbg.h"
 #include "tsp/tsp.hpp"
 using namespace std;
 using namespace tsp;
@@ -23,7 +24,6 @@ TEST_CASE("Sequential TSP") {
     g.add_edge(3, 4, 1);
 
     auto [order_seq, cost_seq] = sequential::tsp(g, 0, 4);
-
     REQUIRE(order_seq == vector<int>{0, 1, 3, 2, 4});
     REQUIRE(cost_seq == 2);
 }
@@ -41,7 +41,7 @@ TEST_CASE("Sequential vs Parallel TSP") {
     for (int t = 0; t < 20; ++t) {
         DenseGraph<int> g = generate(10);
         auto [order_seq, cost_seq] = sequential::tsp(g, 0, 1);
-        auto [order_par, cost_par] = parallel::tsp(g, 0, 1);
+        auto [order_par, cost_par] = parallel::tsp<4>(g, 0, 1);
         REQUIRE(cost_seq == cost_par);
         // REQUIRE(order_seq == order_par);
     }
@@ -64,7 +64,7 @@ TEST_CASE("Sequential multiple parameter edges") {
     g.add_edge(3, 4, ii{1, 0});
 
     auto [order_seq, cost_seq] = sequential::tsp(g, 0, 4, add_pair);
-    auto [order_par, cost_par] = parallel::tsp(g, 0, 4, add_pair);
+    auto [order_par, cost_par] = parallel::tsp<4>(g, 0, 4, add_pair);
 
     REQUIRE(cost_seq == ii{2, 0});
     CHECK(order_seq == vector<int>{0, 1, 3, 2, 4});
@@ -85,6 +85,8 @@ TEST_CASE("Benchmarks") {
         BENCHMARK("Sequential " + to_string(t)) {
             assert(not sequential::tsp(g, 0, 1).first.empty());
         };
-        BENCHMARK("Parallel " + to_string(t)) { assert(not parallel::tsp(g, 0, 1).first.empty()); };
+        BENCHMARK("Parallel " + to_string(t)) {
+            assert(not parallel::tsp<4>(g, 0, 1).first.empty());
+        };
     }
 }

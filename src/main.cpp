@@ -59,7 +59,7 @@ int main(void) {
                 g.add_edge(i, j, distance_matrix[i][j]);
             }
         }
-        auto [order, cost] = tsp::parallel::tsp(g, src, dst);
+        auto [order, cost] = tsp::parallel::tsp<2>(g, src, dst);
 
         /* Output */
         std::ostringstream os;
