@@ -30,7 +30,7 @@ include(${CMAKE_SOURCE_DIR}/cmake/clang_tools.cmake)
 
 # Enable all warnings except for no-sign-compare, which Clang disables
 # by default.
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-sign-compare")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive")
 
 option(WERROR "Turn warnings into errors" OFF)
 if (WERROR)

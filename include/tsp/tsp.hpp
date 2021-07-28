@@ -11,6 +11,8 @@
 #include <utility>
 #include <vector>
 
+#include "dbg.h"
+
 namespace tsp {
 template <typename W>
 struct DenseGraph {
@@ -46,7 +48,7 @@ std::pair<std::vector<int>, W> tsp(DenseGraph<W> g, int src, int dst, BinOp add 
             if (u->vis & (1 << v)) continue;
             if (v == dst and __builtin_popcount(u->vis) + 1 != n) continue;
             if (not g.valid(u->id, v)) continue;
-            if (add(u->cost, g[u->id][v]) > best_cost) continue;
+            if (add(u->cost, g[u->id][v]) >= best_cost) continue;
             bb(new Node<W>(v, u->vis | (1 << v), add(u->cost, g[u->id][v]), u));
         }
         if (u->id == dst) {
@@ -81,7 +83,7 @@ std::pair<std::vector<int>, W> tsp(DenseGraph<W> g, int src, int dst, BinOp add 
             if (u->vis & (1 << v)) continue;
             if (v == dst and __builtin_popcount(u->vis) + 1 != n) continue;
             if (not g.valid(u->id, v)) continue;
-            if (add(u->cost, g[u->id][v]) > best_cost) continue;
+            if (add(u->cost, g[u->id][v]) >= best_cost) continue;
             bb(new Node<W>(v, u->vis | (1 << v), add(u->cost, g[u->id][v]), u));
         }
         if (u->id == dst) {

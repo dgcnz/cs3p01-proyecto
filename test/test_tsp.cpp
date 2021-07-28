@@ -1,9 +1,12 @@
+#include <cassert>
+#include <cmath>
+#include <cstdlib>
+#include <ctime>
 #include <utility>
 #include <vector>
 
 #include "catch2/catch.hpp"
 #include "tsp/tsp.hpp"
-
 using namespace std;
 using namespace tsp;
 
@@ -25,21 +28,22 @@ TEST_CASE("Sequential TSP") {
 }
 
 TEST_CASE("Sequential vs Parallel TSP") {
-    DenseGraph<int> g(5);
+    auto generate = [](int n) {
+        srand(time(NULL));
+        DenseGraph<int> g(n);
+        for (int u = 0; u < n; ++u)
+            for (int v = 0; v < n; ++v)
+                if (u != v) g.add_edge(u, v, abs(rand()) % 100 + 1);
+        return g;
+    };
 
-    g.add_edge(0, 1, 1);
-    g.add_edge(1, 2, 1);
-    g.add_edge(1, 3, 0);
-    g.add_edge(3, 2, 0);
-    g.add_edge(2, 4, 1);
-    g.add_edge(2, 3, 1);
-    g.add_edge(3, 4, 1);
-
-    auto [order_seq, cost_seq] = sequential::tsp(g, 0, 4);
-    auto [order_par, cost_par] = parallel::tsp(g, 0, 4);
-
-    REQUIRE(order_seq == order_par);
-    REQUIRE(cost_seq == cost_par);
+    for (int t = 0; t < 20; ++t) {
+        DenseGraph<int> g = generate(10);
+        auto [order_seq, cost_seq] = sequential::tsp(g, 0, 1);
+        auto [order_par, cost_par] = parallel::tsp(g, 0, 1);
+        REQUIRE(cost_seq == cost_par);
+        // REQUIRE(order_seq == order_par);
+    }
 }
 
 TEST_CASE("Sequential multiple parameter edges") {
@@ -61,6 +65,29 @@ TEST_CASE("Sequential multiple parameter edges") {
     auto [order_seq, cost_seq] = sequential::tsp(g, 0, 4, add_pair);
     auto [order_par, cost_par] = parallel::tsp(g, 0, 4, add_pair);
 
-    REQUIRE(order_seq == vector<int>{0, 1, 3, 2, 4});
     REQUIRE(cost_seq == ii{2, 0});
+    CHECK(order_seq == vector<int>{0, 1, 3, 2, 4});
+}
+
+TEST_CASE("Benchmarks") {
+    auto generate = [](int n) {
+        srand(time(NULL));
+        DenseGraph<int> g(n);
+        for (int u = 0; u < n; ++u)
+            for (int v = 0; v < n; ++v)
+                if (u != v) g.add_edge(u, v, abs(rand()) % 100 + 1);
+        return g;
+    };
+
+    auto g10 = generate(10);
+    BENCHMARK("Sequential 10") { assert(not sequential::tsp(g10, 0, 1).first.empty()); };
+    BENCHMARK("Sequential 10") { assert(not sequential::tsp(g10, 0, 1).first.empty()); };
+
+    auto g11 = generate(11);
+    BENCHMARK("Sequential 11") { assert(not sequential::tsp(g11, 0, 1).first.empty()); };
+    BENCHMARK("Sequential 11") { assert(not sequential::tsp(g11, 0, 1).first.empty()); };
+
+    // auto g22 = generate(22);
+    // BENCHMARK("Sequential 22") { assert(not sequential::tsp(g22, 0, 1).first.empty()); };
+    // BENCHMARK("Sequential 22") { assert(not sequential::tsp(g22, 0, 1).first.empty()); };
 }
