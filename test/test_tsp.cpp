@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 #include <utility>
 #include <vector>
@@ -79,15 +80,11 @@ TEST_CASE("Benchmarks") {
         return g;
     };
 
-    auto g10 = generate(10);
-    BENCHMARK("Sequential 10") { assert(not sequential::tsp(g10, 0, 1).first.empty()); };
-    BENCHMARK("Sequential 10") { assert(not sequential::tsp(g10, 0, 1).first.empty()); };
-
-    auto g11 = generate(11);
-    BENCHMARK("Sequential 11") { assert(not sequential::tsp(g11, 0, 1).first.empty()); };
-    BENCHMARK("Sequential 11") { assert(not sequential::tsp(g11, 0, 1).first.empty()); };
-
-    // auto g22 = generate(22);
-    // BENCHMARK("Sequential 22") { assert(not sequential::tsp(g22, 0, 1).first.empty()); };
-    // BENCHMARK("Sequential 22") { assert(not sequential::tsp(g22, 0, 1).first.empty()); };
+    for (int t = 10; t < 17; ++t) {
+        auto g = generate(t);
+        BENCHMARK("Sequential " + to_string(t)) {
+            assert(not sequential::tsp(g, 0, 1).first.empty());
+        };
+        BENCHMARK("Parallel " + to_string(t)) { assert(not parallel::tsp(g, 0, 1).first.empty()); };
+    }
 }

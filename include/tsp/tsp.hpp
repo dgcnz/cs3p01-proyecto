@@ -3,6 +3,8 @@
 #ifndef CS3P01_PROYECTO_TSP_TSP_H
 #define CS3P01_PROYECTO_TSP_TSP_H
 
+#include <omp.h>
+
 #include <algorithm>
 #include <cstdio>
 #include <functional>
@@ -76,12 +78,15 @@ std::pair<std::vector<int>, W> tsp(DenseGraph<W> g, int src, int dst, BinOp add 
     std::vector<int> best_order;
     W best_cost = g.INF;
 
+    auto threshold = [n](int level) { return (level - 2) * n > omp_get_num_threads(); };
+
     std::function<void(Node<W>*)> bb = [&](Node<W>* u) {
+        int level = __builtin_popcount(u->vis);
 #pragma omp taskloop default(none) shared(g, bb, u, best_order, best_cost, add) \
-    firstprivate(n, src, dst)
+    firstprivate(n, src, dst, level) final(threshold(level))
         for (int v = 0; v < n; ++v) {
             if (u->vis & (1 << v)) continue;
-            if (v == dst and __builtin_popcount(u->vis) + 1 != n) continue;
+            if (v == dst and level + 1 != n) continue;
             if (not g.valid(u->id, v)) continue;
             if (add(u->cost, g[u->id][v]) >= best_cost) continue;
             bb(new Node<W>(v, u->vis | (1 << v), add(u->cost, g[u->id][v]), u));
