@@ -87,3 +87,20 @@ TEST_CASE("Benchmarks") {
         BENCHMARK("Parallel " + to_string(n)) { return parallel::tsp<4>(generate(n), 0, 1); };
     }
 }
+
+TEST_CASE("Efficiency") {
+    auto generate = [](int n) {
+        srand(time(NULL));
+        DenseGraph<int> g(n);
+        for (int u = 0; u < n; ++u)
+            for (int v = 0; v < n; ++v)
+                if (u != v) g.add_edge(u, v, abs(rand()) % 100 + 1);
+        return g;
+    };
+
+    BENCHMARK("Parallel P" + to_string(1)) { return parallel::tsp<1>(generate(15), 0, 1); };
+    BENCHMARK("Parallel P" + to_string(2)) { return parallel::tsp<2>(generate(15), 0, 1); };
+    BENCHMARK("Parallel P" + to_string(4)) { return parallel::tsp<4>(generate(15), 0, 1); };
+    BENCHMARK("Parallel P" + to_string(8)) { return parallel::tsp<8>(generate(15), 0, 1); };
+    BENCHMARK("Parallel P" + to_string(16)) { return parallel::tsp<16>(generate(15), 0, 1); };
+}
