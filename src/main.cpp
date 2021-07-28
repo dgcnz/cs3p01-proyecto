@@ -38,7 +38,9 @@ const double distance_matrix[N][N] = {
 int main(void) {
     httplib::Server svr;
 
-    svr.Get("/", [](const httplib::Request& req, httplib::Response& res) {
+    dbg(svr.set_mount_point("/", "../src/www"));
+
+    svr.Get("/tsp", [](const httplib::Request& req, httplib::Response& res) {
         /* Input */
         std::vector<int> v;
         std::istringstream is(req.get_param_value("v"));
