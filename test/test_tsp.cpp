@@ -1,3 +1,5 @@
+#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
+#define CATCH_CONFIG_ENABLE_BENCHMARKING
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
@@ -80,13 +82,8 @@ TEST_CASE("Benchmarks") {
         return g;
     };
 
-    for (int t = 10; t < 17; ++t) {
-        auto g = generate(t);
-        BENCHMARK("Sequential " + to_string(t)) {
-            assert(not sequential::tsp(g, 0, 1).first.empty());
-        };
-        BENCHMARK("Parallel " + to_string(t)) {
-            assert(not parallel::tsp<4>(g, 0, 1).first.empty());
-        };
+    for (int n = 10; n < 15; ++n) {
+        BENCHMARK("Sequential " + to_string(n)) { return sequential::tsp(generate(n), 0, 1); };
+        BENCHMARK("Parallel " + to_string(n)) { return parallel::tsp<4>(generate(n), 0, 1); };
     }
 }
