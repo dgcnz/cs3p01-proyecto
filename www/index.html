@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>TSP</title>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Load Leaflet: http://leafletjs.com/ -->
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css"
+      integrity="sha512-M2wvCLH6DSRazYeZRIm1JnYyh22purTM+FDB5CsyxtQJYeKq83arPe5wgbNmcFXGqiSH2XR8dT/fJISVA1r/zQ=="
+      crossorigin=""
+    />
+    <script
+      src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"
+      integrity="sha512-lInM/apFSqyy1o6s89K4iQUKg6ppXEgsVxT35HbzUupEVRh2Eu9Wdl4tHj7dZO0s1uvplcYGmt3498TtHq+log=="
+      crossorigin=""
+    ></script>
+
+    <style>
+      body {
+        padding: 0;
+        margin: 0;
+      }
+
+      html,
+      body,
+      #map {
+        height: 100%;
+      }
+
+      active-icon {
+        background-color: red;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map"></div>
+
+    <script>
+      // Initialize the map
+      var map = L.map("map").setView([-12.11, -77.02], 12);
+
+      // Load a tile layer
+      L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "OpenStreetMap",
+        maxZoom: 17,
+        minZoom: 9,
+      }).addTo(map);
+
+      // Add markers
+      var districts = [
+        { alt: 0, latLng: [-12.046403, -77.0426353], title: "Lima Centro" },
+        { alt: 1, latLng: [-12.0848502, -77.0357482], title: "Lince" },
+        { alt: 2, latLng: [-12.111062, -77.0315913], title: "Miraflores" },
+        { alt: 3, latLng: [-12.1411166, -77.0221019], title: "Barranco" },
+        { alt: 4, latLng: [-12.0252287, -77.0332492], title: "Rimac" },
+        { alt: 5, latLng: [-11.9592753, -77.0759903], title: "Los Olivos" },
+        { alt: 6, latLng: [-12.0820306, -76.9282075], title: "La Molina" },
+        { alt: 7, latLng: [-12.0734667, -77.0164395], title: "La Victoria" },
+        { alt: 8, latLng: [-12.0904353, -77.069999], title: "Magdalena" },
+        { alt: 9, latLng: [-12.0955107, -76.9946608], title: "San Borja" },
+      ];
+      var defaultIcon = new L.Icon({
+          iconUrl: "assets/img/marker-icon-grey.png",
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+        }),
+        activeIcon = new L.Icon({
+          iconUrl: "assets/img/marker-icon-red.png",
+          iconSize: [25, 41],
+          iconAnchor: [12, 41],
+        });
+      var markers = districts.map(({ latLng, title }) =>
+        L.marker(latLng, { title, icon: defaultIcon })
+      );
+
+      // Logic
+      var lines = [];
+      var v = [];
+      var handleClick = ({ target: marker }) => {
+        console.log(marker);
+        var { icon, title } = marker.options;
+        var id = districts.findIndex((d) => d.title === title);
+        var newIcon;
+        if (icon === defaultIcon) {
+          newIcon = activeIcon;
+          v.push(id);
+        } else {
+          newIcon = defaultIcon;
+          v.splice(
+            v.findIndex((x) => x === id),
+            1
+          );
+        }
+        marker.setIcon(newIcon);
+
+        lines.forEach((line) => line.remove());
+
+        if (v.length < 2) {
+          return;
+        }
+
+        var xhttp = new XMLHttpRequest();
+        xhttp.onreadystatechange = function () {
+          if (this.readyState == 4 && this.status == 200) {
+            var { cost, order } = JSON.parse(this.responseText);
+            var points = order.map((x) => markers[x].getLatLng());
+            line = L.polyline(points, {
+              color: "red",
+              weight: 5,
+              opacity: 0.5,
+              smoothFactor: 1,
+            });
+            line.addTo(map);
+            lines.push(line);
+          }
+        };
+        console.log(v);
+        xhttp.open(
+          "GET",
+          `http://0.0.0.0:8080/tsp?v=${v.toString()}&src=${v[0]}&dst=${
+            v[v.length - 1]
+          }`,
+          true
+        );
+        xhttp.send();
+      };
+
+      // Connect
+      markers.forEach((marker) => {
+        marker.on("click", handleClick);
+        marker.addTo(map);
+      });
+    </script>
+  </body>
+</html>

@@ -38,7 +38,7 @@ const double distance_matrix[N][N] = {
 int main(void) {
     httplib::Server svr;
 
-    dbg(svr.set_mount_point("/", "../src/www"));
+    dbg(svr.set_mount_point("/", "../www"));
 
     svr.Get("/tsp", [](const httplib::Request& req, httplib::Response& res) {
         /* Input */
@@ -65,6 +65,7 @@ int main(void) {
         std::ostringstream os;
         os << "{ \"order\": [";
         std::copy(order.begin(), order.end(), std::ostream_iterator<int>(os, ","));
+        if (!order.empty()) os.seekp(-1, os.cur);
         os << "], \"cost\": " << cost << " }";
         std::string content(os.str());
 
