@@ -3,6 +3,7 @@
 #include <iterator>
 #include <sstream>
 #include <string>
+#include <vector>
 
 #include "dbg.h"
 #include "httplib/httplib.h"
@@ -40,7 +41,11 @@ int main(void) {
 
     dbg(svr.set_mount_point("/", "../www"));
 
-    svr.Get("/tsp", [](const httplib::Request& req, httplib::Response& res) {
+    tsp::DenseGraph<double> g(N);
+    for (int u = 0; u < N; ++u)
+        for (int v = 0; v < N; ++v) g.add_edge(u, v, distance_matrix[u][v]);
+
+    svr.Get("/tsp", [&g](const httplib::Request& req, httplib::Response& res) {
         /* Input */
         std::vector<int> v;
         std::istringstream is(req.get_param_value("v"));
@@ -53,13 +58,12 @@ int main(void) {
         dbg(dst);
 
         /* Parallel tsp */
-        tsp::DenseGraph<int> g(N);
-        for (int& i : v) {
-            for (int& j : v) {
-                g.add_edge(i, j, distance_matrix[i][j]);
-            }
+        auto [h, id] = g.subgraph(v);
+        auto [order, cost] = tsp::parallel::tsp<2>(h, id[src], id[dst]);
+
+        for (int i = 0; i < (int)order.size(); ++i) {
+            order[i] = v[order[i]];
         }
-        auto [order, cost] = tsp::parallel::tsp<2>(g, src, dst);
 
         /* Output */
         std::ostringstream os;

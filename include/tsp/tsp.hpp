@@ -25,6 +25,16 @@ struct DenseGraph {
     void add_edge(int u, int v, W w) { g[u][v] = w; }
     int size() const { return g.size(); }
     bool valid(int u, int v) { return g[u][v] != INF; }
+    std::pair<DenseGraph<W>, std::vector<int>> subgraph(std::vector<int> nodes) {
+        int n = g.size(), m = nodes.size();
+        DenseGraph<W> h(m);
+        std::vector<int> id(n, -1);
+        for (int i = 0; i < m; ++i) id[nodes[i]] = i;
+        for (int u = 0; u < n; ++u)
+            for (int v = 0; v < n; ++v)
+                if (id[u] != -1 and id[v] != -1) h.add_edge(id[u], id[v], g[u][v]);
+        return {h, id};
+    }
     std::vector<W>& operator[](int u) { return g[u]; }
     std::vector<W> operator[](int u) const { return g[u]; }
 };
