@@ -17,31 +17,10 @@ $ sudo apt install gcc g++ clang clang-format cmake
 
 ## Build
 
-Append `-DCMAKE_BUILD_TYPE=Release` or `-DCMAKE_BUILD_TYPE=Debug` to the `cmake` command
-arguments to specify release or debug builds.
-
-### GCC
-
 ```bash
 $ cd build
 $ cmake ..
 $ make
-```
-
-### Treat warnings as errors
-
-Use `-DWERROR=On` option to treat compile warnings as errors.
-
-```bash
-$ cd build
-$ cmake -DWERROR=On ..
-$ make
-/home/user/GitHub/cs3p01-proyecto/src/danger/bad_examples.cpp:13:18: error: array index
-      3 is past the end of the array (which contains 2 elements)
-      [-Werror,-Warray-bounds]
-    std::cout << a[3];
-                 ^ ~
-...
 ```
 
 ## Run
@@ -54,6 +33,12 @@ commands in the `build` directory.
 ```bash
 $ ./cs3p01-proyecto
 ```
+
+And go to [http://0.0.0.0:8080/](http://0.0.0.0:8080/).
+
+![](docs/img/map.png)
+
+Then, select the subset of district you want to visit. The first will be the source and the last will be the target. 
 
 ### Unit tests
 
@@ -68,33 +53,10 @@ $ ./unit_test
 
 ### Clang-Format
 
-[Clang-Format](https://clang.llvm.org/docs/ClangFormat.html) is a tool that can automically
-format your source code accordiing to a specific style guide, saving developers time. It is
-configured using the [`.clang-format`](.clang-format) configuration file. Modify this file to
-control how source files should be formatted.
-
-To demonstrate `clang-format` in action, first modify a line from [`src/main.cpp`](src/main.cpp)
-
-```cpp
-    return EXIT_SUCCESS;
-```
-
-To
-
-```cpp
-    return           EXIT_SUCCESS;
-```
-
-Next, run `clang-format` on the project.
+For formatting run `clang-format` on the project.
 
 ```bash
 $ cd build
 $ cmake ..
 $ make clang-format
-```
-
-[`src/main.cpp`](src/main.cpp) will be reformatted properly to
-
-```cpp
-    return EXIT_SUCCESS;
 ```
