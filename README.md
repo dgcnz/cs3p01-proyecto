@@ -1,7 +1,6 @@
 # cs3p01-proyecto
 
-For C++ coding guidelines, see the
-[C++ Core Guidelines](https://github.com/isocpp/CppCoreGuidelines).
+Check the pdf report at `docs/report.pdf`.
 
 ## Requirements
 
